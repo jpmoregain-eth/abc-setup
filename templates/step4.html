@@ -15,7 +15,7 @@
         </div>
         
         <div class="selection-grid">
-            {% for item in category.items %}
+            {% for item in category['items'] %}
             <label class="selection-card"
                    data-api-key="{{ 'true' if item.requires_api_key else 'false' }}"
                    data-key-name="{{ item.key_name if item.requires_api_key else '' }}">
@@ -56,7 +56,7 @@
     const capabilitiesWithKeys = {};
     
     {% for category_key, category in capabilities.items() %}
-    {% for item in category.items %}
+    {% for item in category['items'] %}
     {% if item.requires_api_key %}
     capabilitiesWithKeys['{{ item.id }}'] = {
         keyName: '{{ item.key_name }}',
