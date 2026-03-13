@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">Step 2: Agent Persona</h2>
+    <p class="card-description">Choose how your agent should communicate.</p>
+    
+    <form method="POST" action="/setup/2">
+        
+        <label>Select a Persona</label>
+        <div class="selection-grid">
+            {% for persona in personas %}
+            <label class="selection-card {% if progress.get('step_2', {}).get('persona') == persona.id %}selected{% endif %}">
+                <input 
+                    type="radio" 
+                    name="persona" 
+                    value="{{ persona.id }}"
+                    {% if progress.get('step_2', {}).get('persona') == persona.id %}checked{% endif %}
+                    required
+                >
+                <div class="card-title-small">{{ persona.name }}</div>
+                <div class="card-desc">{{ persona.desc }}</div>
+            </label>
+            {% endfor %}
+        </div>
+        
+        <div class="form-group" style="margin-top: 2rem;">
+            <label for="custom_prompt">Custom Instructions (Optional)</label>
+            <textarea 
+                id="custom_prompt" 
+                name="custom_prompt" 
+                placeholder="e.g., Always speak in Singlish, Be extra patient with beginners, Use emojis frequently..."
+            >{{ progress.get('step_2', {}).get('custom_prompt', '') }}</textarea>
+            <p class="help-text">Add any specific instructions for how the agent should behave.</p>
+        </div>
+        
+        <div class="button-group">
+            <a href="/setup/1" class="btn btn-secondary">← Back</a>
+            <button type="submit" class="btn btn-primary">Next →</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Auto-select card styling
+    document.querySelectorAll('input[name="persona"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            this.closest('.selection-card').classList.add('selected');
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">Step 3: AI Model Provider</h2>
+    <p class="card-description">Choose the AI brain for your agent.</p>
+    
+    <form method="POST" action="/setup/3" id="model-form">
+        
+        <label>Select Provider</label>
+        <div class="selection-grid">
+            {% for key, provider in ai_providers.items() %}
+            <label class="selection-card {% if progress.get('step_3', {}).get('provider') == key %}selected{% endif %}"
+                   onclick="selectProvider('{{ key }}')">
+                <input 
+                    type="radio" 
+                    name="provider" 
+                    value="{{ key }}"
+                    {% if progress.get('step_3', {}).get('provider') == key %}checked{% endif %}
+                    required
+                >
+                <div class="card-title-small">
+                    {{ provider.name }}
+                    {% if key == 'anthropic' %}<span class="badge badge-recommended">Recommended</span>{% endif %}
+                </div>
+                <div class="card-desc">{{ provider.description }}</div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">
+                    Endpoint: {{ provider.endpoint[:40] }}...
+                </div>
+            </label>
+            {% endfor %}
+        </div>
+        
+        <!-- Model Selection -->
+        <div class="form-group" style="margin-top: 2rem;">
+            <label for="model_name">Model</label>
+            <select id="model_name" name="model_name" required>
+                <option value="">Select a model...</option>
+                {% for key, provider in ai_providers.items() %}
+                <optgroup label="{{ provider.name }}" data-provider="{{ key }}" style="display: none;">
+                    {% for model in provider.models %}
+                    <option 
+                        value="{{ model.id }}"
+                        data-provider="{{ key }}"
+                        {% if progress.get('step_3', {}).get('model_name') == model.id %}selected{% endif %}
+                    >
+                        {{ model.name }} ({{ model.context }} context)
+                        {% if model.recommended %}(Recommended){% endif %}
+                    </option>
+                    {% endfor %}
+                </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- API Key -->
+        <div class="form-group">
+            <label for="api_key">API Key *</label>
+            <input 
+                type="password" 
+                id="api_key" 
+                name="api_key" 
+                placeholder="Your API key"
+                value="{{ progress.get('step_3', {}).get('api_key', '') }}"
+                required
+            >
+            <p class="help-text" id="api-key-help">Enter your API key for the selected provider.</p>
+        </div>
+        
+        <!-- Custom Endpoint (for Custom provider) -->
+        <div class="form-group" id="custom-endpoint-group" style="display: none;">
+            <label for="custom_endpoint">Custom Endpoint URL</label>
+            <input 
+                type="text" 
+                id="custom_endpoint" 
+                name="custom_endpoint" 
+                placeholder="http://localhost:11434/v1/chat/completions"
+                value="{{ progress.get('step_3', {}).get('custom_endpoint', '') }}"
+            >
+            <p class="help-text">For local models like Ollama.</p>
+        </div>
+        
+        <div class="button-group">
+            <a href="/setup/2" class="btn btn-secondary">← Back</a>
+            <button type="submit" class="btn btn-primary">Next →</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const providers = {{ ai_providers | tojson }};
+    
+    function selectProvider(providerKey) {
+        // Update model dropdown
+        const modelSelect = document.getElementById('model_name');
+        
+        // Show only options for selected provider
+        modelSelect.querySelectorAll('optgroup').forEach(group => {
+            group.style.display = 'none';
+        });
+        modelSelect.querySelectorAll('option').forEach(option => {
+            option.style.display = 'none';
+        });
+        
+        const selectedGroup = modelSelect.querySelector(`optgroup[data-provider="${providerKey}"]`);
+        if (selectedGroup) {
+            selectedGroup.style.display = 'block';
+            selectedGroup.querySelectorAll('option').forEach(option => {
+                option.style.display = 'block';
+            });
+        }
+        
+        // Show custom endpoint field if custom provider
+        const customEndpointGroup = document.getElementById('custom-endpoint-group');
+        if (providerKey === 'custom') {
+            customEndpointGroup.style.display = 'block';
+            document.getElementById('custom_endpoint').required = true;
+        } else {
+            customEndpointGroup.style.display = 'none';
+            document.getElementById('custom_endpoint').required = false;
+        }
+        
+        // Update API key help text
+        const provider = providers[providerKey];
+        if (provider) {
+            const helpText = document.getElementById('api-key-help');
+            if (providerKey === 'custom') {
+                helpText.textContent = 'API key may be optional for local models.';
+            } else {
+                helpText.textContent = `Get your key from ${provider.docs_url}`;
+            }
+        }
+        
+        // Update card selection styling
+        document.querySelectorAll('.selection-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        event.currentTarget.classList.add('selected');
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedProvider = document.querySelector('input[name="provider"]:checked');
+        if (selectedProvider) {
+            selectProvider(selectedProvider.value);
+        }
+    });
+</script>
+
+{% endblock %}
