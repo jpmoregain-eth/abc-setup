@@ -13,6 +13,7 @@
     }
   ],
   "env": {
-    "FLASK_ENV": "production"
+    "FLASK_ENV": "production",
+    "FLASK_SECRET_KEY": "abc-setup-secret-key-2026-agent-bear-corps"
   }
 }

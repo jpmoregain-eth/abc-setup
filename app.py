@@ -24,7 +24,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+# Use a fixed secret key for Vercel (sessions won't persist across deployments but work within one)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'abc-setup-dev-key-2026')
 
 # For Vercel serverless - use Flask session instead of file storage
 from flask import session
