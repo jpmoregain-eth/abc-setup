@@ -11,19 +11,19 @@ anthropic:
   docs_url: https://console.anthropic.com
   region: US
   models:
-    - id: claude-opus-4
-      name: Claude Opus 4
+    - id: claude-opus-4-6
+      name: Claude Opus 4.6
       context: 200K
-      description: Most powerful - complex tasks
+      description: Most intelligent - complex tasks, agentic workflows
     - id: claude-sonnet-4-6
       name: Claude Sonnet 4.6
       context: 200K
       recommended: true
-      description: Best balance - recommended
-    - id: claude-haiku-3-5
-      name: Claude Haiku 3.5
+      description: Best balance - coding & computer use
+    - id: claude-haiku-4-5
+      name: Claude Haiku 4.5
       context: 200K
-      description: Fastest & most affordable
+      description: Fastest - cost-effective for simple queries
 
 openai:
   name: OpenAI (USA)
