@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+# For Vercel serverless - use Flask session instead of file storage
+from flask import session
+
 # Constants
 REGISTRY_PATH = Path.home() / '.agentbear' / 'registry.json'
 KEY_FILE = Path.home() / '.agentbear' / '.master_key'
@@ -127,74 +130,46 @@ def complete():
 
 @app.route('/api/generate-config', methods=['POST'])
 def generate_config():
-    """Generate agent configuration"""
+    """Generate agent configuration - Vercel compatible (no file write)"""
     data = request.json
     
     config = build_config(data)
     
-    # Save to file
-    config_path = Path('generated_agent') / f"{config['agent']['name']}.yaml"
-    config_path.parent.mkdir(exist_ok=True)
-    
-    with open(config_path, 'w') as f:
-        yaml.dump(config, f, default_flow_style=False)
+    # Return config as YAML string (no file write on Vercel)
+    config_yaml = yaml.dump(config, default_flow_style=False)
     
     return jsonify({
         'success': True,
-        'config_path': str(config_path),
+        'config_yaml': config_yaml,
         'config': config
     })
 
 
 @app.route('/api/launch', methods=['POST'])
 def launch_agent():
-    """Launch the generated agent"""
-    data = request.json
-    config_path = data.get('config_path')
-    
-    if not config_path or not Path(config_path).exists():
-        return jsonify({'error': 'Config not found'}), 400
-    
-    try:
-        # Launch agent in background
-        subprocess.Popen(
-            [sys.executable, '-m', 'agentbear.core', '--config', config_path],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True
-        )
-        
-        return jsonify({
-            'success': True,
-            'message': 'Agent launched successfully'
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    """Launch the generated agent - Demo mode for Vercel"""
+    # On Vercel serverless, we can't launch subprocesses
+    # Just return success for demo purposes
+    return jsonify({
+        'success': True,
+        'message': 'Agent configured successfully (Demo mode - no subprocess on serverless)'
+    })
 
 
 def save_progress(step: int, data: dict):
-    """Save wizard progress"""
-    progress_file = Path('.setup_progress.json')
+    """Save wizard progress to Flask session (Vercel-compatible)"""
+    # Initialize session progress if not exists
+    if 'progress' not in session:
+        session['progress'] = {}
     
-    existing = {}
-    if progress_file.exists():
-        with open(progress_file, 'r') as f:
-            existing = json.load(f)
-    
-    existing[f'step_{step}'] = dict(data)
-    
-    with open(progress_file, 'w') as f:
-        json.dump(existing, f)
+    # Convert form data to dict and save
+    session['progress'][f'step_{step}'] = dict(data)
+    session.modified = True
 
 
 def load_progress() -> dict:
-    """Load wizard progress"""
-    progress_file = Path('.setup_progress.json')
-    
-    if progress_file.exists():
-        with open(progress_file, 'r') as f:
-            return json.load(f)
-    return {}
+    """Load wizard progress from Flask session"""
+    return session.get('progress', {})
 
 
 def build_config(data: dict) -> dict:
