@@ -21,8 +21,10 @@
             </div>
             
             <div style="background: var(--bg-elevated); padding: 1rem; border-radius: 0.5rem;">
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">{{ progress.get('step_2', {}).get('persona', 'Default') | title }}</div>
-                <div style="font-size: 0.875rem; color: var(--text-secondary);">Persona</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">
+                    {{ progress.get('step_2', {}).get('personas', []) | length }}
+                </div>
+                <div style="font-size: 0.875rem; color: var(--text-secondary);">Personas</div>
             </div>
             
             <div style="background: var(--bg-elevated); padding: 1rem; border-radius: 0.5rem;">
@@ -108,13 +110,16 @@
 agent:
   name: {{ progress.get('step_1', {}).get('agent_name', 'my-agent') }}
   owner: {{ progress.get('step_1', {}).get('owner_name', 'owner') }}
-  persona: {{ progress.get('step_2', {}).get('persona', 'professional') }}
+  personas: {% for p in progress.get('step_2', {}).get('personas', []) %}{{ p }}{% if not loop.last %}, {% endif %}{% endfor %}
   language: {{ progress.get('step_1', {}).get('language', 'en') }}
 
-model:
-  provider: {{ progress.get('step_3', {}).get('provider', 'anthropic') }}
-  name: {{ progress.get('step_3', {}).get('model_name', 'claude-sonnet-4-6') }}
-  api_key: "ENC:******"
+models:
+  primary: {{ progress.get('step_3', {}).get('primary_model', 'claude-sonnet-4-6') }}
+  providers:
+{% for provider in progress.get('step_3', {}).get('providers', []) %}
+    - {{ provider }}:
+        api_key: "ENC:******"
+{% endfor %}
 
 capabilities:
 {% for cap in progress.get('step_4', {}).get('capabilities', []) %}
@@ -144,10 +149,16 @@ capabilities:
     function downloadConfig() {
         const agentName = '{{ progress.get('step_1', {}).get('agent_name', 'my-agent') }}';
         const ownerName = '{{ progress.get('step_1', {}).get('owner_name', 'owner') }}';
-        const persona = '{{ progress.get('step_2', {}).get('persona', 'professional') }}';
+        const personas = [];
+        {% for p in progress.get('step_2', {}).get('personas', []) %}
+        personas.push('{{ p }}');
+        {% endfor %}
         const language = '{{ progress.get('step_1', {}).get('language', 'en') }}';
-        const provider = '{{ progress.get('step_3', {}).get('provider', 'anthropic') }}';
-        const modelName = '{{ progress.get('step_3', {}).get('model_name', 'claude-sonnet-4-6') }}';
+        const providers = [];
+        {% for p in progress.get('step_3', {}).get('providers', []) %}
+        providers.push('{{ p }}');
+        {% endfor %}
+        const primaryModel = '{{ progress.get('step_3', {}).get('primary_model', 'claude-sonnet-4-6') }}';
         
         // Build capabilities list
         const capabilities = [];
@@ -162,17 +173,34 @@ capabilities:
 agent:
   name: ${agentName}
   owner: ${ownerName}
-  persona: ${persona}
-  language: ${language}
+  personas:
+`;
+        
+        if (personas.length > 0) {
+            personas.forEach(p => {
+                yamlContent += `    - ${p}\n`;
+            });
+        } else {
+            yamlContent += `    - professional\n`;
+        }
+        
+        yamlContent += `  language: ${language}
   version: "1.0.0"
 
-model:
-  provider: ${provider}
-  name: ${modelName}
-  api_key: "YOUR_API_KEY_HERE"
-  temperature: 0.3
-  max_tokens: 4000
-
+models:
+  primary: ${primaryModel}
+  providers:
+`;
+        
+        if (providers.length > 0) {
+            providers.forEach(provider => {
+                yamlContent += `    ${provider}:
+      api_key: "YOUR_API_KEY_HERE"
+`;
+            });
+        }
+        
+        yamlContent += `
 capabilities:
 `;
         

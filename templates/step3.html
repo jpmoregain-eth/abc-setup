@@ -3,47 +3,52 @@
 {% block content %}
 
 <div class="card">
-    <h2 class="card-title">Step 3: AI Model Provider</h2>
-    <p class="card-description">Choose the AI brain for your agent.</p>
+    <h2 class="card-title">Step 3: AI Model Providers</h2>
+    <p class="card-description">Choose one or more AI providers for your agent.</p>
     
     <form method="POST" action="/setup/3" id="model-form">
         
-        <label>Select Provider</label>
+        <label>Select Provider(s)</label>
         <div class="selection-grid">
             {% for key, provider in ai_providers.items() %}
-            <label class="selection-card {% if progress.get('step_3', {}).get('provider') == key %}selected{% endif %}"
-                   onclick="selectProvider('{{ key }}')">
+            <label class="selection-card {% if key in progress.get('step_3', {}).get('providers', []) %}selected{% endif %}"
+                   data-provider="{{ key }}">
                 <input 
-                    type="radio" 
-                    name="provider" 
+                    type="checkbox" 
+                    name="providers" 
                     value="{{ key }}"
-                    {% if progress.get('step_3', {}).get('provider') == key %}checked{% endif %}
-                    required
+                    {% if key in progress.get('step_3', {}).get('providers', []) %}checked{% endif %}
+                    onchange="updateProviders()"
                 >
                 <div class="card-title-small">
                     {{ provider.name }}
                     {% if key == 'anthropic' %}<span class="badge badge-recommended">Recommended</span>{% endif %}
                 </div>
                 <div class="card-desc">{{ provider.description }}</div>
-                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">
-                    Endpoint: {{ provider.endpoint[:40] }}...
-                </div>
             </label>
             {% endfor %}
         </div>
         
-        <!-- Model Selection -->
+        <!-- Dynamic API Key Fields for Selected Providers -->
+        <div id="api-keys-section" style="margin-top: 2rem;">
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">API Keys</h4>
+            <div id="provider-api-keys">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Primary Model Selection -->
         <div class="form-group" style="margin-top: 2rem;">
-            <label for="model_name">Model</label>
-            <select id="model_name" name="model_name" required>
-                <option value="">Select a model...</option>
+            <label for="primary_model">Primary Model *</label>
+            <select id="primary_model" name="primary_model" required>
+                <option value="">Select primary model...</option>
                 {% for key, provider in ai_providers.items() %}
                 <optgroup label="{{ provider.name }}" data-provider="{{ key }}" style="display: none;">
                     {% for model in provider.models %}
                     <option 
                         value="{{ model.id }}"
                         data-provider="{{ key }}"
-                        {% if progress.get('step_3', {}).get('model_name') == model.id %}selected{% endif %}
+                        {% if progress.get('step_3', {}).get('primary_model') == model.id %}selected{% endif %}
                     >
                         {{ model.name }} ({{ model.context }} context)
                         {% if model.recommended %}(Recommended){% endif %}
@@ -52,33 +57,7 @@
                 </optgroup>
                 {% endfor %}
             </select>
-        </div>
-        
-        <!-- API Key -->
-        <div class="form-group">
-            <label for="api_key">API Key *</label>
-            <input 
-                type="password" 
-                id="api_key" 
-                name="api_key" 
-                placeholder="Your API key"
-                value="{{ progress.get('step_3', {}).get('api_key', '') }}"
-                required
-            >
-            <p class="help-text" id="api-key-help">Enter your API key for the selected provider.</p>
-        </div>
-        
-        <!-- Custom Endpoint (for Custom provider) -->
-        <div class="form-group" id="custom-endpoint-group" style="display: none;">
-            <label for="custom_endpoint">Custom Endpoint URL</label>
-            <input 
-                type="text" 
-                id="custom_endpoint" 
-                name="custom_endpoint" 
-                placeholder="http://localhost:11434/v1/chat/completions"
-                value="{{ progress.get('step_3', {}).get('custom_endpoint', '') }}"
-            >
-            <p class="help-text">For local models like Ollama.</p>
+            <p class="help-text">This model will be used as the default. Others are available as fallbacks.</p>
         </div>
         
         <div class="button-group">
@@ -91,60 +70,109 @@
 <script>
     const providers = {{ ai_providers | tojson }};
     
-    function selectProvider(providerKey) {
-        // Update model dropdown
-        const modelSelect = document.getElementById('model_name');
+    function updateProviders() {
+        const selectedProviders = Array.from(document.querySelectorAll('input[name="providers"]:checked'))
+            .map(cb => cb.value);
         
-        // Show only options for selected provider
-        modelSelect.querySelectorAll('optgroup').forEach(group => {
-            group.style.display = 'none';
-        });
-        modelSelect.querySelectorAll('option').forEach(option => {
-            option.style.display = 'none';
-        });
-        
-        const selectedGroup = modelSelect.querySelector(`optgroup[data-provider="${providerKey}"]`);
-        if (selectedGroup) {
-            selectedGroup.style.display = 'block';
-            selectedGroup.querySelectorAll('option').forEach(option => {
-                option.style.display = 'block';
-            });
-        }
-        
-        // Show custom endpoint field if custom provider
-        const customEndpointGroup = document.getElementById('custom-endpoint-group');
-        if (providerKey === 'custom') {
-            customEndpointGroup.style.display = 'block';
-            document.getElementById('custom_endpoint').required = true;
-        } else {
-            customEndpointGroup.style.display = 'none';
-            document.getElementById('custom_endpoint').required = false;
-        }
-        
-        // Update API key help text
-        const provider = providers[providerKey];
-        if (provider) {
-            const helpText = document.getElementById('api-key-help');
-            if (providerKey === 'custom') {
-                helpText.textContent = 'API key may be optional for local models.';
+        // Update card styling
+        document.querySelectorAll('.selection-card').forEach(card => {
+            const providerKey = card.dataset.provider;
+            if (selectedProviders.includes(providerKey)) {
+                card.classList.add('selected');
             } else {
-                helpText.textContent = `Get your key from ${provider.docs_url}`;
+                card.classList.remove('selected');
+            }
+        });
+        
+        // Update API key fields
+        updateApiKeyFields(selectedProviders);
+        
+        // Update primary model dropdown
+        updatePrimaryModelOptions(selectedProviders);
+    }
+    
+    function updateApiKeyFields(selectedProviders) {
+        const container = document.getElementById('provider-api-keys');
+        const section = document.getElementById('api-keys-section');
+        
+        // Clear existing
+        container.innerHTML = '';
+        
+        if (selectedProviders.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+        
+        section.style.display = 'block';
+        
+        // Add API key field for each selected provider
+        selectedProviders.forEach(providerKey => {
+            const provider = providers[providerKey];
+            if (!provider) return;
+            
+            const existingValue = '';
+            
+            const fieldHtml = `
+                <div class="form-group" style="background: var(--bg-dark); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <label for="api_key_${providerKey}">${provider.name} API Key *</label>
+                    <input 
+                        type="password" 
+                        id="api_key_${providerKey}" 
+                        name="api_key_${providerKey}" 
+                        placeholder="Enter ${provider.name} API key"
+                        value="${existingValue}"
+                        required
+                    >
+                    <p class="help-text">
+                        Get your key from <a href="${provider.docs_url}" target="_blank" style="color: var(--primary);">${provider.docs_url}</a>
+                    </p>
+                    
+                    {% if key == 'custom' %}
+                    <div style="margin-top: 0.5rem;">
+                        <label for="custom_endpoint_${providerKey}">Custom Endpoint (optional)</label>
+                        <input 
+                            type="text" 
+                            id="custom_endpoint_${providerKey}" 
+                            name="custom_endpoint_${providerKey}" 
+                            placeholder="http://localhost:11434/v1/chat/completions"
+                        >
+                    </div>
+                    {% endif %}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', fieldHtml);
+        });
+    }
+    
+    function updatePrimaryModelOptions(selectedProviders) {
+        const select = document.getElementById('primary_model');
+        const currentValue = select.value;
+        
+        // Show/hide optgroups based on selected providers
+        select.querySelectorAll('optgroup').forEach(group => {
+            const providerKey = group.dataset.provider;
+            if (selectedProviders.includes(providerKey)) {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+        
+        // Reset if current selection is from unselected provider
+        if (currentValue) {
+            const currentOption = select.querySelector(`option[value="${currentValue}"]`);
+            if (currentOption) {
+                const providerKey = currentOption.dataset.provider;
+                if (!selectedProviders.includes(providerKey)) {
+                    select.value = '';
+                }
             }
         }
-        
-        // Update card selection styling
-        document.querySelectorAll('.selection-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        event.currentTarget.classList.add('selected');
     }
     
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        const selectedProvider = document.querySelector('input[name="provider"]:checked');
-        if (selectedProvider) {
-            selectProvider(selectedProvider.value);
-        }
+        updateProviders();
     });
 </script>
 

@@ -8,16 +8,15 @@
     
     <form method="POST" action="/setup/2">
         
-        <label>Select a Persona</label>
+        <label>Select Persona(s)</label>
         <div class="selection-grid">
             {% for persona in personas %}
-            <label class="selection-card {% if progress.get('step_2', {}).get('persona') == persona.id %}selected{% endif %}">
+            <label class="selection-card {% if persona.id in progress.get('step_2', {}).get('personas', []) %}selected{% endif %}">
                 <input 
-                    type="radio" 
-                    name="persona" 
+                    type="checkbox" 
+                    name="personas" 
                     value="{{ persona.id }}"
-                    {% if progress.get('step_2', {}).get('persona') == persona.id %}checked{% endif %}
-                    required
+                    {% if persona.id in progress.get('step_2', {}).get('personas', []) %}checked{% endif %}
                 >
                 <div class="card-title-small">{{ persona.name }}</div>
                 <div class="card-desc">{{ persona.description }}</div>
@@ -43,13 +42,14 @@
 </div>
 
 <script>
-    // Auto-select card styling
-    document.querySelectorAll('input[name="persona"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.querySelectorAll('.selection-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            this.closest('.selection-card').classList.add('selected');
+    // Auto-select card styling for checkboxes
+    document.querySelectorAll('input[name="personas"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                this.closest('.selection-card').classList.add('selected');
+            } else {
+                this.closest('.selection-card').classList.remove('selected');
+            }
         });
     });
 </script>
