@@ -83,17 +83,29 @@ google:
 
 xai:
   name: xAI (USA)
-  description: Grok models - Real-time knowledge
+  description: Grok-4 series - Real-time reasoning & multi-agent
   endpoint: https://api.x.ai/v1/chat/completions
   api_key_prefix: xai-
   docs_url: https://console.x.ai
   region: US
   models:
-    - id: grok-2
-      name: Grok 2
+    - id: grok-4-heavy
+      name: Grok-4 Heavy
+      context: 128K
+      description: Premium multi-agent - several agents working together
+    - id: grok-4
+      name: Grok-4
       context: 128K
       recommended: true
-      description: Real-time X/Twitter knowledge
+      description: Improved reasoning on complex tasks
+    - id: grok-4-code
+      name: Grok-4 Code
+      context: 128K
+      description: Specialized for coding assistance
+    - id: grok-4-1
+      name: Grok 4.1
+      context: 128K
+      description: Better conversational flow & emotional intelligence
 
 # 🇨🇳 CHINESE MODELS
 
