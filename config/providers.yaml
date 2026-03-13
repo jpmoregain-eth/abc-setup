@@ -53,21 +53,33 @@ openai:
 
 google:
   name: Google Gemini (USA)
-  description: Ultra-long context, multimodal
+  description: Gemini 3 series - Multimodal frontier models
   endpoint: https://generativelanguage.googleapis.com/v1beta
   api_key_prefix: ""
   docs_url: https://ai.google.dev
   region: US
   models:
-    - id: gemini-1.5-pro
-      name: Gemini 1.5 Pro
+    - id: gemini-3-pro
+      name: Gemini 3 Pro
       context: 2M
       recommended: true
-      description: Massive 2M context window
-    - id: gemini-1.5-flash
-      name: Gemini 1.5 Flash
-      context: 1M
-      description: Fast with 1M context
+      description: High-capability - complex reasoning & coding
+    - id: gemini-3-deep-think
+      name: Gemini 3 Deep Think
+      context: 2M
+      description: Extreme complexity - science & research
+    - id: gemini-3-flash
+      name: Gemini 3 Flash
+      context: 2M
+      description: Fast, cost-effective multimodal
+    - id: gemini-3-1-flash-lite
+      name: Gemini 3.1 Flash-Lite
+      context: 2M
+      description: Most cost-efficient, low-latency
+    - id: gemini-3-pro-image
+      name: Gemini 3 Pro Image
+      context: 2M
+      description: High-fidelity image generation
 
 xai:
   name: xAI (USA)
