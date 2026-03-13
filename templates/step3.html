@@ -127,7 +127,7 @@
                         Get your key from <a href="${provider.docs_url}" target="_blank" style="color: var(--primary);">${provider.docs_url}</a>
                     </p>
                     
-                    {% if key == 'custom' %}
+                    ${providerKey === 'custom' ? `
                     <div style="margin-top: 0.5rem;">
                         <label for="custom_endpoint_${providerKey}">Custom Endpoint (optional)</label>
                         <input 
@@ -137,7 +137,7 @@
                             placeholder="http://localhost:11434/v1/chat/completions"
                         >
                     </div>
-                    {% endif %}
+                    ` : ''}
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', fieldHtml);
