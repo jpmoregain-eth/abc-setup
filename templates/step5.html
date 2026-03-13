@@ -46,14 +46,14 @@
             
             {% set selected_caps = progress.get('step_4', {}).get('capabilities', []) %}
             {% if selected_caps %}
-                <div style="max-height: 150px; overflow-y: auto; padding: 0.5rem; background: var(--bg-dark); border-radius: 0.5rem;">
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="max-height: 200px; overflow-y: auto; padding: 0.75rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-secondary);">
                         {% for cap_id in selected_caps %}
-                            <span style="background: rgba(99,102,241,0.2); padding: 0.4rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; white-space: nowrap;">
+                            <li style="margin-bottom: 0.25rem;">
                                 {{ cap_id | replace('_', ' ') | title }}
-                            </span>
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
                 <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
                     {{ selected_caps | length }} capabilities selected
