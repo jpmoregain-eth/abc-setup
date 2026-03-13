@@ -27,21 +27,29 @@ anthropic:
 
 openai:
   name: OpenAI (USA)
-  description: GPT-4o - General purpose powerhouse
+  description: GPT-5 series - Advanced reasoning & agentic capabilities
   endpoint: https://api.openai.com/v1/chat/completions
   api_key_prefix: sk-
   docs_url: https://platform.openai.com
   region: US
   models:
-    - id: gpt-4o
-      name: GPT-4o
-      context: 128K
+    - id: gpt-5-4-pro
+      name: GPT-5.4 Pro
+      context: 1M
+      description: Most advanced - deep research, high-stakes tasks
+    - id: gpt-5-4
+      name: GPT-5.4
+      context: 1M
       recommended: true
-      description: Best for general tasks and reasoning
-    - id: gpt-4o-mini
-      name: GPT-4o Mini
-      context: 128K
-      description: Fast and cost-effective
+      description: Flagship model - coding, reasoning, agentic use
+    - id: gpt-5-mini
+      name: GPT-5 Mini
+      context: 1M
+      description: Fast, cost-efficient high-level reasoning
+    - id: gpt-5-nano
+      name: GPT-5 Nano
+      context: 1M
+      description: Fastest, most cost-effective for simple tasks
 
 google:
   name: Google Gemini (USA)
