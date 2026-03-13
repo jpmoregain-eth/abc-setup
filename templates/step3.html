@@ -42,20 +42,6 @@
             <label for="primary_model">Primary Model *</label>
             <select id="primary_model" name="primary_model" required>
                 <option value="">Select primary model...</option>
-                {% for key, provider in ai_providers.items() %}
-                <optgroup label="{{ provider.name }}" data-provider="{{ key }}" style="display: none;">
-                    {% for model in provider.models %}
-                    <option 
-                        value="{{ model.id }}"
-                        data-provider="{{ key }}"
-                        {% if progress.get('step_3', {}).get('primary_model') == model.id %}selected{% endif %}
-                    >
-                        {{ model.name }} ({{ model.context }} context)
-                        {% if model.recommended %}(Recommended){% endif %}
-                    </option>
-                    {% endfor %}
-                </optgroup>
-                {% endfor %}
             </select>
             <p class="help-text">This model will be used as the default. Others are available as fallbacks.</p>
         </div>
@@ -148,26 +134,30 @@
         const select = document.getElementById('primary_model');
         const currentValue = select.value;
         
-        // Show/hide optgroups based on selected providers
-        select.querySelectorAll('optgroup').forEach(group => {
-            const providerKey = group.dataset.provider;
-            if (selectedProviders.includes(providerKey)) {
-                group.style.display = 'block';
-            } else {
-                group.style.display = 'none';
-            }
-        });
+        // Clear and rebuild options
+        select.innerHTML = '<option value="">Select primary model...</option>';
         
-        // Reset if current selection is from unselected provider
-        if (currentValue) {
-            const currentOption = select.querySelector(`option[value="${currentValue}"]`);
-            if (currentOption) {
-                const providerKey = currentOption.dataset.provider;
-                if (!selectedProviders.includes(providerKey)) {
-                    select.value = '';
+        // Add models from selected providers
+        selectedProviders.forEach(providerKey => {
+            const provider = providers[providerKey];
+            if (!provider || !provider.models) return;
+            
+            // Add optgroup
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = provider.name;
+            
+            provider.models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                option.textContent = `${model.name} (${model.context} context)${model.recommended ? ' (Recommended)' : ''}`;
+                if (model.id === currentValue) {
+                    option.selected = true;
                 }
-            }
-        }
+                optgroup.appendChild(option);
+            });
+            
+            select.appendChild(optgroup);
+        });
     }
     
     // Initialize on page load
