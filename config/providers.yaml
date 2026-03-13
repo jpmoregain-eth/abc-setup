@@ -141,21 +141,29 @@ deepseek:
 
 alibaba:
   name: Qwen (Alibaba - China)
-  description: Qwen 2.5 - Versatile and capable
+  description: Qwen3 & Qwen3.5 series - Agentic capabilities
   endpoint: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
   api_key_prefix: sk-
   docs_url: https://dashscope.aliyun.com
   region: CN
   models:
-    - id: qwen-max
-      name: Qwen 2.5 Max
-      context: 128K
+    - id: qwen3-max
+      name: Qwen3-Max
+      context: 1M
+      description: Largest model - 1T+ params, complex reasoning
+    - id: qwen3-5-plus
+      name: Qwen3.5-Plus
+      context: 1M
       recommended: true
-      description: Alibaba's flagship model
-    - id: qwen-coder-plus
-      name: Qwen 2.5 Coder
-      context: 128K
-      description: Specialized for coding
+      description: Agentic inflection - web browsing, coding, reasoning
+    - id: qwen3-5-small
+      name: Qwen3.5-Small
+      context: 1M
+      description: Efficient, on-device capabilities
+    - id: qwen3-5-coder
+      name: Qwen3.5-Coder
+      context: 1M
+      description: High-speed coding & software development
 
 moonshot:
   name: Moonshot AI (China)
