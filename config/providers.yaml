@@ -189,17 +189,29 @@ moonshot:
 
 baidu:
   name: ERNIE (Baidu - China)
-  description: Wenxin Yiyan - Knowledge focused
+  description: ERNIE 5.0 series - Native omni-modality
   endpoint: https://qianfan.baidubce.com/v2/chat/completions
   api_key_prefix: ""
   docs_url: https://qianfan.cloud.baidu.com
   region: CN
   models:
-    - id: ernie-4-0-turbo
-      name: ERNIE 4.0 Turbo
+    - id: ernie-5-0
+      name: ERNIE 5.0
       context: 128K
       recommended: true
-      description: Baidu's latest flagship
+      description: Flagship - omni-modal, reasoning, agentic planning
+    - id: ernie-4-5-turbo
+      name: ERNIE 4.5 Turbo
+      context: 128K
+      description: Fast inference, lower cost, multimodal
+    - id: ernie-4-5
+      name: ERNIE 4.5
+      context: 128K
+      description: Advanced multimodal, charts & images
+    - id: ernie-4-5-vl-thinking
+      name: ERNIE-4.5-VL Thinking
+      context: 128K
+      description: Open-source - "Thinking with Images"
 
 # 🌍 OTHER PROVIDERS
 
