@@ -111,21 +111,33 @@ xai:
 
 deepseek:
   name: DeepSeek (China)
-  description: Open-source leader, coding expert
+  description: High-performance, cost-effective MoE models
   endpoint: https://api.deepseek.com/v1/chat/completions
   api_key_prefix: sk-
   docs_url: https://platform.deepseek.com
   region: CN
   models:
-    - id: deepseek-chat
-      name: DeepSeek V3
-      context: 64K
+    - id: deepseek-v3-2-speciale
+      name: DeepSeek-V3.2 Speciale
+      context: 128K
+      description: Advanced mathematical reasoning - Olympiad-level
+    - id: deepseek-v3-2
+      name: DeepSeek-V3.2
+      context: 128K
       recommended: true
-      description: Top Chinese model for coding
-    - id: deepseek-reasoner
-      name: DeepSeek R1
+      description: Agentic workflows & high-level reasoning
+    - id: deepseek-v3
+      name: DeepSeek-V3
       context: 64K
-      description: Reasoning specialist
+      description: General-purpose, coding, mathematics
+    - id: deepseek-r1
+      name: DeepSeek-R1
+      context: 64K
+      description: Reasoning-focused - shows thought process
+    - id: deepseek-prover-v2
+      name: DeepSeek-Prover-V2
+      context: 64K
+      description: Formal theorem proving in Lean 4
 
 alibaba:
   name: Qwen (Alibaba - China)
