@@ -101,8 +101,17 @@ def setup(step):
         return redirect(url_for('setup', step=1))
     
     if request.method == 'POST':
-        # Save progress to session/temp file
-        save_progress(step, request.form)
+        # Save progress to session - handle MultiDict properly
+        form_data = {}
+        for key in request.form:
+            # Get all values for this key (handles multiple checkboxes)
+            values = request.form.getlist(key)
+            if len(values) == 1:
+                form_data[key] = values[0]
+            else:
+                form_data[key] = values
+        
+        save_progress(step, form_data)
         
         if step < 6:
             return redirect(url_for('setup', step=step + 1))
