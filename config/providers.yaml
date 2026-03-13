@@ -167,17 +167,25 @@ alibaba:
 
 moonshot:
   name: Moonshot AI (China)
-  description: Kimi k1.5 - Long context expert
+  description: Kimi K2 family - Open-source agentic reasoning
   endpoint: https://api.moonshot.cn/v1/chat/completions
   api_key_prefix: sk-
   docs_url: https://platform.moonshot.cn
   region: CN
   models:
-    - id: kimi-k1-5
-      name: Kimi k1.5
-      context: 200K
+    - id: kimi-k2-5
+      name: Kimi K2.5
+      context: 256K
       recommended: true
-      description: 200K context, great for documents
+      description: Most powerful - multimodal, coordinates 100 sub-agents
+    - id: kimi-k2-thinking
+      name: Kimi K2 Thinking
+      context: 256K
+      description: Deep reasoning - 200-300+ sequential tool calls
+    - id: kimi-k2-instruct
+      name: Kimi K2 Instruct
+      context: 256K
+      description: General-purpose coding & reasoning
 
 baidu:
   name: ERNIE (Baidu - China)
