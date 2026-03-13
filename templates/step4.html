@@ -52,8 +52,9 @@
 </div>
 
 <script>
-    // Track which capabilities require API keys
+    // Track which capabilities require API keys and secrets
     const capabilitiesWithKeys = {};
+    const capabilitiesWithSecrets = {};
     
     {% for category_key, category in capabilities.items() %}
     {% for item in category['items'] %}
@@ -61,6 +62,12 @@
     capabilitiesWithKeys['{{ item.id }}'] = {
         keyName: '{{ item.key_name }}',
         description: '{{ item.key_description }}'
+    };
+    {% endif %}
+    {% if item.requires_secret %}
+    capabilitiesWithSecrets['{{ item.id }}'] = {
+        secretName: '{{ item.secret_name }}',
+        description: '{{ item.secret_description }}'
     };
     {% endif %}
     {% endfor %}
@@ -78,7 +85,7 @@
         selected.forEach(capId => {
             if (capabilitiesWithKeys[capId]) {
                 const keyInfo = capabilitiesWithKeys[capId];
-                const existingValue = '{{ progress.get("step_4", {}).get("api_keys", {}).get("__key__", "") }}'.replace('__key__', keyInfo.keyName);
+                const existingValue = '';
                 
                 const fieldHtml = `
                     <div class="form-group">
@@ -94,6 +101,27 @@
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', fieldHtml);
+            }
+            
+            // Add secret field if required
+            if (capabilitiesWithSecrets[capId]) {
+                const secretInfo = capabilitiesWithSecrets[capId];
+                const existingValue = '';
+                
+                const secretHtml = `
+                    <div class="form-group">
+                        <label for="${secretInfo.secretName}">${secretInfo.description} *</label>
+                        <input 
+                            type="password" 
+                            id="${secretInfo.secretName}" 
+                            name="${secretInfo.secretName}" 
+                            placeholder="Enter ${secretInfo.description}"
+                            value="${existingValue}"
+                            required
+                        >
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', secretHtml);
             }
         });
         

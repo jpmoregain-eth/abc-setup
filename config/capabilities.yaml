@@ -140,6 +140,9 @@ specialized:
       requires_api_key: true
       key_name: binance_api_key
       key_description: Binance API Key
+      requires_secret: true
+      secret_name: binance_api_secret
+      secret_description: Binance API Secret
       
     - id: database_query
       name: Database Query
